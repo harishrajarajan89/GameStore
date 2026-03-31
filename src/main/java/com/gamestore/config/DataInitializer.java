@@ -19,7 +19,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Create default test user if not exists
+        //  default test user 
         if (userRepository.findByUsername("testuser").isEmpty()) {
             User testUser = User.builder()
                 .username("testuser")
@@ -31,7 +31,7 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("✓ Default test user created: username=testuser, password=password123");
         }
 
-        // Create admin user if not exists
+        // admin user
         if (userRepository.findByUsername("admin").isEmpty()) {
             User adminUser = User.builder()
                 .username("admin")
