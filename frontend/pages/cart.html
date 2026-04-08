@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cart — GameVault</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>Your <span>Cart</span></h1>
+    </div>
+
+    <div id="alert-box"></div>
+
+    <div id="cart-container">
+      <div class="loading-state"><div class="spinner"></div><p>Loading cart...</p></div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!requireAuth()) return;
+      renderNavbar('cart');
+      loadCart();
+    });
+
+    async function loadCart() {
+      try {
+        const cart = await CartAPI.get();
+        renderCart(cart);
+      } catch (err) {
+        document.getElementById('cart-container').innerHTML =
+          `<div class="empty-state"><h3>Failed to load cart</h3><p>${err.message}</p></div>`;
+      }
+    }
+
+    function renderCart(cart) {
+      const container = document.getElementById('cart-container');
+      if (!cart.items || cart.items.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <h3>Your cart is empty</h3>
+            <p>Browse our store and add some games!</p>
+            <a href="/index.html" class="btn btn-primary mt-4">Browse Games</a>
+          </div>`;
+        return;
+      }
+
+      const itemsHTML = cart.items.map(item => `
+        <div class="cart-item" id="cart-item-${item.id}">
+          <img class="cart-item-img"
+               src="${item.gameImageUrl || 'https://via.placeholder.com/72x96?text=?'}"
+               alt="${item.gameTitle}"
+               onerror="this.src='https://via.placeholder.com/72x96?text=?'"/>
+          <div class="cart-item-info">
+            <div class="cart-item-title">${item.gameTitle}</div>
+            <div class="cart-item-price">${formatPrice(item.unitPrice)} each</div>
+            <div class="qty-control">
+              <button class="qty-btn" onclick="updateQty(${item.id}, ${item.quantity - 1})">−</button>
+              <span class="qty-value" id="qty-${item.id}">${item.quantity}</span>
+              <button class="qty-btn" onclick="updateQty(${item.id}, ${item.quantity + 1})">+</button>
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-family:'Orbitron',sans-serif;font-size:0.95rem;color:var(--neon-cyan);margin-bottom:12px;">
+              ${formatPrice(item.subtotal)}
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="removeItem(${item.id})">Remove</button>
+          </div>
+        </div>
+      `).join('');
+
+      container.innerHTML = `
+        <div class="cart-layout">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+              <span style="color:var(--text-secondary);font-size:0.9rem;">${cart.items.length} item(s)</span>
+              <button class="btn btn-danger btn-sm" onclick="clearCart()">Clear Cart</button>
+            </div>
+            ${itemsHTML}
+          </div>
+          <div class="cart-summary">
+            <h3>Order Summary</h3>
+            ${cart.items.map(item => `
+              <div class="summary-line">
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%;">${item.gameTitle}</span>
+                <span>${formatPrice(item.subtotal)}</span>
+              </div>
+            `).join('')}
+            <div class="summary-total">
+              <span>Total</span>
+              <span>${formatPrice(cart.totalAmount)}</span>
+            </div>
+            <button class="btn btn-success btn-block btn-lg" style="margin-top:20px;" id="checkout-btn" onclick="checkout()">
+              Checkout
+            </button>
+            <a href="/index.html" class="btn btn-secondary btn-block" style="margin-top:10px;text-align:center;">
+              Continue Shopping
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    async function updateQty(itemId, newQty) {
+      try {
+        const cart = await CartAPI.updateItem(itemId, newQty);
+        renderCart(cart);
+        updateCartCount();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function removeItem(itemId) {
+      try {
+        const cart = await CartAPI.removeItem(itemId);
+        renderCart(cart);
+        updateCartCount();
+        showToast('Item removed', 'info');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function clearCart() {
+      if (!confirm('Clear your entire cart?')) return;
+      try {
+        await CartAPI.clear();
+        loadCart();
+        updateCartCount();
+        showToast('Cart cleared', 'info');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function checkout() {
+      const btn = document.getElementById('checkout-btn');
+      setLoading(btn, true, 'Processing...');
+      try {
+        const order = await OrdersAPI.checkout();
+        showToast(`Order #${order.id} placed successfully!`, 'success');
+        updateCartCount();
+        setTimeout(() => window.location.href = '/pages/orders.html', 1000);
+      } catch (err) {
+        showToast(err.message, 'error');
+        setLoading(btn, false, 'Checkout');
+      }
+    }
+  </script>
+</body>
+</html>

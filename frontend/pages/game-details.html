@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game Detail — GameVault</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+    .detail-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 40px;
+      align-items: start;
+      padding: 40px 0;
+    }
+    .detail-img {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-card);
+    }
+    .detail-info { display: flex; flex-direction: column; gap: 18px; }
+    .detail-title { font-size: 1.8rem; }
+    .detail-price {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      color: var(--neon-cyan);
+    }
+    .detail-desc { color: var(--text-secondary); line-height: 1.7; font-size: 1rem; }
+    .detail-meta { display: flex; flex-direction: column; gap: 8px; }
+    .meta-row { display: flex; gap: 12px; align-items: center; font-size: 0.9rem; }
+    .meta-label { color: var(--text-muted); min-width: 80px; }
+    .meta-value { color: var(--text-primary); font-weight: 600; }
+    .qty-row { display: flex; align-items: center; gap: 16px; margin-top: 8px; }
+    @media (max-width: 700px) {
+      .detail-layout { grid-template-columns: 1fr; }
+      .detail-img { max-width: 260px; margin: 0 auto; display: block; }
+    }
+  </style>
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="container" id="detail-container">
+    <div class="loading-state"><div class="spinner"></div><p>Loading game...</p></div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    let currentGame = null;
+    let quantity = 1;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderNavbar('');
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) {
+        document.getElementById('detail-container').innerHTML =
+          '<div class="empty-state"><h3>Game not found</h3><a href="/index.html" class="btn btn-primary mt-4">Back to Store</a></div>';
+        return;
+      }
+      loadGame(id);
+    });
+
+    async function loadGame(id) {
+      try {
+        currentGame = await GamesAPI.getById(id);
+        renderDetail(currentGame);
+      } catch (err) {
+        document.getElementById('detail-container').innerHTML =
+          `<div class="empty-state"><h3>Game not found</h3><p>${err.message}</p>
+           <a href="/index.html" class="btn btn-primary mt-4">Back to Store</a></div>`;
+      }
+    }
+
+    function renderDetail(g) {
+      const img = g.imageUrl || 'https://via.placeholder.com/300x400?text=No+Image';
+      const stockClass = g.stock === 0 ? 'out' : g.stock < 5 ? 'low' : '';
+      const stockText  = g.stock === 0 ? 'Out of stock' : g.stock < 5 ? `Only ${g.stock} left!` : `${g.stock} in stock`;
+      document.title = `${g.title} — GameVault`;
+
+      document.getElementById('detail-container').innerHTML = `
+        <a href="/index.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--text-muted);font-size:0.9rem;padding:24px 0 0;transition:color 0.2s;"
+           onmouseover="this.style.color='var(--neon-cyan)'" onmouseout="this.style.color='var(--text-muted)'">
+          ← Back to Store
+        </a>
+        <div class="detail-layout">
+          <div>
+            <img class="detail-img" src="${img}" alt="${g.title}"
+                 onerror="this.src='https://via.placeholder.com/300x400?text=No+Image'"/>
+          </div>
+          <div class="detail-info">
+            <h1 class="detail-title">${g.title}</h1>
+            <div class="game-card-meta">
+              ${g.genre    ? `<span class="badge badge-genre">${g.genre}</span>` : ''}
+              ${g.platform ? `<span class="badge badge-platform">${g.platform}</span>` : ''}
+            </div>
+            <div class="detail-price">${formatPrice(g.price)}</div>
+            <p class="detail-desc">${g.description || 'No description available.'}</p>
+            <div class="detail-meta">
+              ${g.platform ? `<div class="meta-row"><span class="meta-label">Platform</span><span class="meta-value">${g.platform}</span></div>` : ''}
+              ${g.genre    ? `<div class="meta-row"><span class="meta-label">Genre</span><span class="meta-value">${g.genre}</span></div>` : ''}
+              <div class="meta-row">
+                <span class="meta-label">Stock</span>
+                <span class="meta-value game-card-stock ${stockClass}">${stockText}</span>
+              </div>
+            </div>
+
+            ${g.stock > 0 ? `
+              <div class="qty-row">
+                <span style="color:var(--text-secondary);font-size:0.85rem;text-transform:uppercase;letter-spacing:0.06em;">Quantity</span>
+                <div class="qty-control">
+                  <button class="qty-btn" onclick="changeQty(-1)">−</button>
+                  <span class="qty-value" id="qty-display">1</span>
+                  <button class="qty-btn" onclick="changeQty(1)">+</button>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                <button class="btn btn-primary btn-lg" id="add-to-cart-btn" onclick="addToCart()">
+                  🛒 Add to Cart
+                </button>
+                <a href="/index.html" class="btn btn-secondary btn-lg">Continue Shopping</a>
+              </div>
+            ` : `
+              <button class="btn btn-lg" disabled style="opacity:0.35;width:fit-content;">Sold Out</button>
+            `}
+          </div>
+        </div>
+      `;
+    }
+
+    function changeQty(delta) {
+      quantity = Math.max(1, Math.min(quantity + delta, currentGame?.stock || 1));
+      document.getElementById('qty-display').textContent = quantity;
+    }
+
+    async function addToCart() {
+      if (!Auth.isLoggedIn()) {
+        showToast('Please login to add to cart', 'warning');
+        setTimeout(() => window.location.href = '/pages/login.html', 800);
+        return;
+      }
+      const btn = document.getElementById('add-to-cart-btn');
+      setLoading(btn, true, 'Adding...');
+      try {
+        await CartAPI.addItem({ gameId: currentGame.id, quantity });
+        showToast(`${currentGame.title} added to cart!`, 'success');
+        updateCartCount();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        setLoading(btn, false, '🛒 Add to Cart');
+      }
+    }
+  </script>
+</body>
+</html>

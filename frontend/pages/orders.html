@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Orders — GameVault</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+  <div id="navbar"></div>
+  <div class="container">
+    <div class="page-header">
+      <h1>My <span>Orders</span></h1>
+    </div>
+    <div id="orders-container">
+      <div class="loading-state"><div class="spinner"></div><p>Loading orders...</p></div>
+    </div>
+  </div>
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!requireAuth()) return;
+      renderNavbar('orders');
+      loadOrders();
+    });
+
+    async function loadOrders() {
+      try {
+        const orders = await OrdersAPI.getAll();
+        renderOrders(orders);
+      } catch (err) {
+        document.getElementById('orders-container').innerHTML =
+          `<div class="empty-state"><h3>Failed to load orders</h3><p>${err.message}</p></div>`;
+      }
+    }
+
+    function renderOrders(orders) {
+      const container = document.getElementById('orders-container');
+      if (!orders || orders.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <h3>No orders yet</h3>
+            <p>Your order history will appear here.</p>
+            <a href="/index.html" class="btn btn-primary mt-4">Browse Games</a>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = orders.map(order => `
+        <div class="order-card">
+          <div class="order-card-header">
+            <div>
+              <div class="order-id">Order #${order.id}</div>
+              <div class="order-date">${formatDate(order.createdAt)}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+              <span class="status-badge status-${order.status}">${order.status}</span>
+              <div class="order-total">${formatPrice(order.totalAmount)}</div>
+            </div>
+          </div>
+          <div class="order-items-list">
+            ${order.items.map(item => `
+              <div class="order-item-row">
+                <img class="order-item-img"
+                     src="${item.gameImageUrl || 'https://via.placeholder.com/48x64?text=?'}"
+                     alt="${item.gameTitle}"
+                     onerror="this.src='https://via.placeholder.com/48x64?text=?'"/>
+                <div class="order-item-details">
+                  <div class="order-item-title">${item.gameTitle}</div>
+                  <div class="order-item-sub">Qty: ${item.quantity} × ${formatPrice(item.unitPrice)}</div>
+                </div>
+                <div style="font-family:'Orbitron',sans-serif;font-size:0.85rem;color:var(--neon-cyan);flex-shrink:0;">
+                  ${formatPrice(item.subtotal)}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel — GameVault</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+  <div id="navbar"></div>
+  <div class="container section">
+    <div class="admin-layout">
+      <div class="admin-sidebar">
+        <div class="admin-sidebar-header">Admin Panel</div>
+        <ul class="admin-nav">
+          <li><a href="#" class="active" id="nav-games" onclick="showSection('games', event)">🎮 Games</a></li>
+          <li><a href="#" id="nav-orders" onclick="showSection('orders', event)">📦 Orders</a></li>
+        </ul>
+      </div>
+      <div>
+        <div id="section-games">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+            <h2 style="font-size:1.1rem;">Manage Games</h2>
+            <button class="btn btn-primary" onclick="openGameModal()">+ Add Game</button>
+          </div>
+          <div id="games-table-container">
+            <div class="loading-state"><div class="spinner"></div></div>
+          </div>
+        </div>
+        <!-- orders section -->
+        <div id="section-orders" class="hidden">
+          <h2 style="font-size:1.1rem;margin-bottom:20px;">All Orders</h2>
+          <div id="orders-table-container">
+            <div class="loading-state"><div class="spinner"></div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!--game -->
+  <div class="modal-overlay" id="game-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">Add Game</h2>
+        <button class="modal-close" onclick="closeModal('game-modal')">×</button>
+      </div>
+      <div id="modal-alert"></div>
+      <form class="modal-form" id="game-form">
+        <div class="form-group">
+          <label>Title *</label>
+          <input type="text" id="g-title" placeholder="Game title" required/>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="g-description" placeholder="Game description..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Price (Rs) *</label>
+            <input type="number" id="g-price" placeholder="0.00" step="0.01" min="0.01" required/>
+          </div>
+          <div class="form-group">
+            <label>Stock *</label>
+            <input type="number" id="g-stock" placeholder="0" min="0" required/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Genre</label>
+            <select id="g-genre">
+              <option value="">Select genre</option>
+              <option>Action</option>
+              <option>Action-Adventure</option>
+              <option>RPG</option>
+              <option>Sandbox</option>
+              <option>Sports</option>
+              <option>Strategy</option>
+              <option>Horror</option>
+              <option>Shooter</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Platform</label>
+            <select id="g-platform">
+              <option value="">Select platform</option>
+              <option>PC</option>
+              <option>PlayStation 4</option>
+              <option>PlayStation 5</option>
+              <option>Xbox One</option>
+              <option>Xbox Series X</option>
+              <option>Nintendo Switch</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Game Cover Image</label>
+          <div style="display:flex;gap:0;margin-bottom:8px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+            <button type="button" id="tab-upload" onclick="switchImageTab('upload')"
+              style="flex:1;padding:7px;background:var(--neon-cyan);color:#000;border:none;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase;transition:all 0.2s;">
+              📁 Upload File
+            </button>
+            <button type="button" id="tab-url" onclick="switchImageTab('url')"
+              style="flex:1;padding:7px;background:var(--bg-elevated);color:var(--text-secondary);border:none;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:0.82rem;letter-spacing:0.05em;text-transform:uppercase;transition:all 0.2s;">
+              🔗 Paste URL
+            </button>
+          </div>
+          <div id="panel-upload">
+            <div id="drop-zone"
+              style="border:2px dashed var(--border);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--bg-elevated);"
+              onclick="document.getElementById('g-image-file').click()"
+              ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+              <div id="drop-zone-content">
+                <div style="font-size:2rem;margin-bottom:8px;">🖼️</div>
+                <div style="color:var(--text-secondary);font-size:0.9rem;">Click to browse or drag & drop</div>
+                <div style="color:var(--text-muted);font-size:0.78rem;margin-top:4px;">JPG, PNG, WEBP — max 10MB</div>
+              </div>
+            </div>
+            <input type="file" id="g-image-file" accept="image/*" style="display:none" onchange="handleFileSelect(event)"/>
+            <div id="upload-status" style="margin-top:8px;font-size:0.85rem;"></div>
+          </div>
+          <!-- URL panel -->
+          <div id="panel-url" style="display:none;">
+            <input type="url" id="g-image-url" placeholder="https://example.com/cover.jpg"/>
+          </div>
+          <!--preview-->
+          <div id="image-preview-wrap" style="display:none;margin-top:10px;">
+            <img id="image-preview" src="" alt="Preview"
+              style="width:80px;height:107px;object-fit:cover;border-radius:var(--radius);border:1px solid var(--border);"/>
+            <button type="button" onclick="clearImage()"
+              style="display:block;margin-top:6px;background:none;border:none;color:var(--danger);cursor:pointer;font-size:0.82rem;">✕ Remove</button>
+          </div>
+          <input type="hidden" id="g-final-image-url"/>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="submit" class="btn btn-primary" id="save-game-btn">Save Game</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('game-modal')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="modal-overlay" id="delete-modal">
+    <div class="modal" style="max-width:380px;">
+      <div class="modal-header">
+        <h2>Confirm Delete</h2>
+        <button class="modal-close" onclick="closeModal('delete-modal')">×</button>
+      </div>
+      <p style="color:var(--text-secondary);margin-bottom:24px;">
+        Are you sure you want to delete <strong id="delete-game-name" style="color:var(--text-primary);"></strong>?
+        This action cannot be undone.
+      </p>
+      <div style="display:flex;gap:12px;">
+        <button class="btn btn-danger" id="confirm-delete-btn">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('delete-modal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script>
+    let editingGameId = null;
+    function switchImageTab(tab) {
+      const isUpload = tab === 'upload';
+      document.getElementById('panel-upload').style.display = isUpload ? 'block' : 'none';
+      document.getElementById('panel-url').style.display   = isUpload ? 'none'  : 'block';
+      document.getElementById('tab-upload').style.background = isUpload ? 'var(--neon-cyan)' : 'var(--bg-elevated)';
+      document.getElementById('tab-upload').style.color      = isUpload ? '#000' : 'var(--text-secondary)';
+      document.getElementById('tab-url').style.background    = isUpload ? 'var(--bg-elevated)' : 'var(--neon-cyan)';
+      document.getElementById('tab-url').style.color         = isUpload ? 'var(--text-secondary)' : '#000';
+    }
+    function handleDragOver(e) {
+      e.preventDefault();
+      document.getElementById('drop-zone').style.borderColor = 'var(--neon-cyan)';
+      document.getElementById('drop-zone').style.background  = 'rgba(0,229,255,0.05)';
+    }
+    function handleDragLeave(e) {
+      document.getElementById('drop-zone').style.borderColor = 'var(--border)';
+      document.getElementById('drop-zone').style.background  = 'var(--bg-elevated)';
+    }
+    function handleDrop(e) {
+      e.preventDefault();
+      handleDragLeave(e);
+      const file = e.dataTransfer.files[0];
+      if (file) processImageFile(file);
+    }
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (file) processImageFile(file);
+    }
+
+    async function processImageFile(file) {
+      if (!file.type.startsWith('image/')) { showToast('Please select an image file', 'error'); return; }
+      if (file.size > 10 * 1024 * 1024) { showToast('Image must be under 10MB', 'error'); return; }
+      const reader = new FileReader();
+      reader.onload = (e) => showImagePreview(e.target.result);
+      reader.readAsDataURL(file);
+      const status = document.getElementById('upload-status');
+      status.innerHTML = '<span style="color:var(--neon-cyan);">⏳ Uploading to cloud...</span>';
+
+      const formData = new FormData();
+      formData.append('file', file);
+      const creds = Auth.getCredentials();
+      try {
+        const res = await fetch('http://localhost:8080/api/images/upload', {
+          method: 'POST',
+          headers: { 'Authorization': `Basic ${creds}` },
+          body: formData,
+          credentials: 'include'
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.message || 'Upload failed');
+        }
+        const data = await res.json();
+        document.getElementById('g-final-image-url').value = data.url;
+        showImagePreview(data.url);
+        status.innerHTML = '<span style="color:var(--success);">✓ Uploaded successfully</span>';
+      } catch (err) {
+        status.innerHTML = `<span style="color:var(--danger);">✕ ${err.message}</span>`;
+        document.getElementById('g-final-image-url').value = '';
+      }
+    }
+
+    function showImagePreview(src) {
+      document.getElementById('image-preview').src = src;
+      document.getElementById('image-preview-wrap').style.display = 'block';
+    }
+
+    function clearImage() {
+      document.getElementById('g-final-image-url').value = '';
+      document.getElementById('g-image-file').value = '';
+      document.getElementById('g-image-url').value = '';
+      document.getElementById('image-preview-wrap').style.display = 'none';
+      document.getElementById('upload-status').innerHTML = '';
+    }
+    function showSection(name, event) {
+      if (event) event.preventDefault();
+      document.getElementById('section-games').classList.toggle('hidden', name !== 'games');
+      document.getElementById('section-orders').classList.toggle('hidden', name !== 'orders');
+      document.querySelectorAll('.admin-nav a').forEach(a => a.classList.remove('active'));
+      document.getElementById(`nav-${name}`).classList.add('active');
+      if (name === 'orders') loadOrders();
+      if (name === 'games')  loadGames();
+    }
+    async function loadGames() {
+      const c = document.getElementById('games-table-container');
+      c.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+      try {
+        const games = await GamesAPI.getAll();
+        renderGamesTable(games);
+      } catch (err) {
+        c.innerHTML = `<div class="empty-state"><h3>Error: ${err.message}</h3></div>`;
+      }
+    }
+
+    function renderGamesTable(games) {
+      const c = document.getElementById('games-table-container');
+      if (!games.length) {
+        c.innerHTML = '<div class="empty-state"><h3>No games yet</h3></div>';
+        return;
+      }
+      c.innerHTML = `
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th><th>Image</th><th>Title</th><th>Genre</th>
+                <th>Platform</th><th>Price</th><th>Stock</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${games.map(g => `
+                <tr>
+                  <td style="color:var(--text-muted);font-size:0.8rem;">#${g.id}</td>
+                  <td><img src="${g.imageUrl || 'https://via.placeholder.com/40x53?text=?'}"
+                           style="width:40px;height:53px;object-fit:cover;border-radius:4px;background:var(--bg-elevated);"
+                           onerror="this.src='https://via.placeholder.com/40x53?text=?'"/></td>
+                  <td style="font-weight:600;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${g.title}</td>
+                  <td>${g.genre ? `<span class="badge badge-genre">${g.genre}</span>` : '—'}</td>
+                  <td>${g.platform ? `<span class="badge badge-platform">${g.platform}</span>` : '—'}</td>
+                  <td style="font-family:'Orbitron',sans-serif;color:var(--neon-cyan);">${formatPrice(g.price)}</td>
+                  <td><span class="game-card-stock ${g.stock < 5 ? (g.stock === 0 ? 'out' : 'low') : ''}">${g.stock}</span></td>
+                  <td>
+                    <div style="display:flex;gap:6px;">
+                      <button class="btn btn-secondary btn-sm" onclick="editGame(${g.id})">Edit</button>
+                      <button class="btn btn-danger btn-sm" onclick="promptDelete(${g.id}, '${g.title.replace(/'/g,"\\'")}')">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+    function openGameModal(game = null) {
+      editingGameId = game ? game.id : null;
+      document.getElementById('modal-title').textContent = game ? 'Edit Game' : 'Add Game';
+      document.getElementById('g-title').value       = game?.title || '';
+      document.getElementById('g-description').value = game?.description || '';
+      document.getElementById('g-price').value       = game?.price || '';
+      document.getElementById('g-stock').value       = game?.stock ?? 0;
+      document.getElementById('g-genre').value       = game?.genre || '';
+      document.getElementById('g-platform').value    = game?.platform || '';
+      clearImage();
+      if (game?.imageUrl) {
+        document.getElementById('g-final-image-url').value = game.imageUrl;
+        switchImageTab('url');
+        document.getElementById('g-image-url').value = game.imageUrl;
+        showImagePreview(game.imageUrl);
+      } else {
+        switchImageTab('upload');
+      }
+
+      clearAlert('modal-alert');
+      openModal('game-modal');
+    }
+
+    async function editGame(id) {
+      try {
+        const game = await GamesAPI.getById(id);
+        openGameModal(game);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+    document.getElementById('game-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearAlert('modal-alert');
+      const btn = document.getElementById('save-game-btn');
+      const finalUrl = document.getElementById('g-final-image-url').value.trim();
+
+      const payload = {
+        title:       document.getElementById('g-title').value.trim(),
+        description: document.getElementById('g-description').value.trim(),
+        price:       parseFloat(document.getElementById('g-price').value),
+        stock:       parseInt(document.getElementById('g-stock').value),
+        genre:       document.getElementById('g-genre').value || null,
+        platform:    document.getElementById('g-platform').value || null,
+        image:    finalUrl || null,
+      };
+
+      if (!payload.title || isNaN(payload.price)) {
+        showAlert('modal-alert', 'Title and a valid price are required.', 'error'); return;
+      }
+
+      setLoading(btn, true, 'Saving...');
+      try {
+        if (editingGameId) {
+          await GamesAPI.update(editingGameId, payload);
+          showToast('Game updated!', 'success');
+        } else {
+          await GamesAPI.create(payload);
+          showToast('Game added!', 'success');
+        }
+        closeModal('game-modal');
+        loadGames();
+      } catch (err) {
+        showAlert('modal-alert', err.message, 'error');
+      } finally {
+        setLoading(btn, false, 'Save Game');
+      }
+    });
+
+    let deleteTargetId = null;
+    function promptDelete(id, name) {
+      deleteTargetId = id;
+      document.getElementById('delete-game-name').textContent = name;
+      openModal('delete-modal');
+    }
+
+    document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+      if (!deleteTargetId) return;
+      const btn = document.getElementById('confirm-delete-btn');
+      setLoading(btn, true, 'Deleting...');
+      try {
+        await GamesAPI.delete(deleteTargetId);
+        showToast('Game deleted', 'success');
+        closeModal('delete-modal');
+        loadGames();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        setLoading(btn, false, 'Delete');
+        deleteTargetId = null;
+      }
+    });
+
+    async function loadOrders() {
+      const c = document.getElementById('orders-table-container');
+      c.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+      try {
+        const orders = await AdminAPI.getAllOrders();
+        renderOrdersTable(orders);
+      } catch (err) {
+        c.innerHTML = `<div class="empty-state"><h3>Error: ${err.message}</h3></div>`;
+      }
+    }
+    function renderOrdersTable(orders) {
+      const c = document.getElementById('orders-table-container');
+      if (!orders.length) {
+        c.innerHTML = '<div class="empty-state"><h3>No orders yet</h3></div>';
+        return;
+      }
+
+      const statuses = ['PENDING','PROCESSING','SHIPPED','DELIVERED','CANCELLED'];
+
+      c.innerHTML = `
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Order ID</th><th>User</th><th>Items</th>
+                <th>Total</th><th>Date</th><th>Status</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${orders.map(o => `
+                <tr>
+                  <td style="font-family:'Orbitron',sans-serif;font-size:0.78rem;">#${o.id}</td>
+                  <td>${o.username}</td>
+                  <td style="color:var(--text-secondary);">${o.items.length} item(s)</td>
+                  <td style="font-family:'Orbitron',sans-serif;color:var(--neon-cyan);">${formatPrice(o.totalAmount)}</td>
+                  <td style="color:var(--text-muted);font-size:0.82rem;">${formatDate(o.createdAt)}</td>
+                  <td><span class="status-badge status-${o.status}">${o.status}</span></td>
+                  <td>
+                    <select style="background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-primary);
+                                   border-radius:6px;padding:4px 8px;font-size:0.82rem;cursor:pointer;"
+                            onchange="updateStatus(${o.id}, this.value)">
+                      ${statuses.map(s =>
+                        `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s}</option>`
+                      ).join('')}
+                    </select>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    async function updateStatus(orderId, status) {
+      try {
+        await AdminAPI.updateOrderStatus(orderId, status);
+        showToast(`Order #${orderId} → ${status}`, 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+        loadOrders();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!requireAdmin()) return;
+      renderNavbar('admin');
+      loadGames();
+
+      document.addEventListener('input', (e) => {
+        if (e.target.id === 'g-image-url') {
+          const url = e.target.value.trim();
+          document.getElementById('g-final-image-url').value = url;
+          if (url) showImagePreview(url);
+          else document.getElementById('image-preview-wrap').style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

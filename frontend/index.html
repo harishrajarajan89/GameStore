@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GameVault — Game Store</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="navbar"></div>
+  <div class="container">
+    <section class="hero">
+      <h1>Your Ultimate Game Store</h1>
+      <p>Browse hundreds of titles across all platforms. Buy physical game CDs delivered to your door.</p>
+      <a href="#games-section" class="btn btn-primary btn-lg">Browse Games</a>
+    </section>
+  </div>
+  <div class="container section" id="games-section">
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search games..." />
+      <select id="genre-filter">
+        <option value="">All Genres</option>
+        <option value="Action">Action</option>
+        <option value="Action-Adventure">Action-Adventure</option>
+        <option value="RPG">RPG</option>
+        <option value="Sandbox">Sandbox</option>
+        <option value="Sports">Sports</option>
+        <option value="Strategy">Strategy</option>
+        <option value="Horror">Horror</option>
+        <option value="Shooter">Shooter</option>
+      </select>
+      <button class="btn btn-secondary" id="search-btn">Search</button>
+      <button class="btn btn-secondary" id="clear-btn">Clear</button>
+    </div>
+
+    <div id="games-container">
+      <div class="loading-state"><div class="spinner"></div><p>Loading games...</p></div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/index.js">  </script>
+</body>
+</html>
