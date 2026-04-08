@@ -405,7 +405,6 @@
       }
 
       const statuses = ['PENDING','PROCESSING','SHIPPED','DELIVERED','CANCELLED'];
-
       c.innerHTML = `
         <div class="data-table-wrap">
           <table class="data-table">
@@ -420,7 +419,7 @@
                 <tr>
                   <td style="font-family:'Orbitron',sans-serif;font-size:0.78rem;">#${o.id}</td>
                   <td>${o.username}</td>
-                  <td style="color:var(--text-secondary);">${o.items.length} item(s)</td>
+                  <td>${renderOrderItems(o.items)}</td>
                   <td style="font-family:'Orbitron',sans-serif;color:var(--neon-cyan);">${formatPrice(o.totalAmount)}</td>
                   <td style="color:var(--text-muted);font-size:0.82rem;">${formatDate(o.createdAt)}</td>
                   <td><span class="status-badge status-${o.status}">${o.status}</span></td>
@@ -440,7 +439,23 @@
         </div>
       `;
     }
+    function renderOrderItems(items) {
+      if (!items || !items.length) {
+        return '<span style="color:var(--text-muted);">No items</span>';
+      }
 
+      return `
+        <div class="admin-order-items">
+          <div class="admin-order-items-count">${items.length} item(s)</div>
+          ${items.map(item => `
+            <div class="admin-order-item">
+              <div class="admin-order-item-title">${item.gameTitle}</div>
+              <div class="admin-order-item-meta">Qty: ${item.quantity} x ${formatPrice(item.unitPrice)}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
     async function updateStatus(orderId, status) {
       try {
         await AdminAPI.updateOrderStatus(orderId, status);
@@ -450,7 +465,6 @@
         loadOrders();
       }
     }
-
     document.addEventListener('DOMContentLoaded', () => {
       if (!requireAdmin()) return;
       renderNavbar('admin');
@@ -468,3 +482,4 @@
   </script>
 </body>
 </html>
+sersetretgdrf dtytdtyt iouhsdf oijsdf pihsc sfcoiuiffs sfoiisg nnhiok knxc oiuojhhxc ihfsdc ert  iytguit iughh iughiu huygf iuy uyg hyhyyyh 

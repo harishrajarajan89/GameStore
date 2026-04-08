@@ -693,6 +693,39 @@ textarea { resize: vertical; min-height: 90px; }
   font-size: 0.82rem;
   color: var(--text-muted);
 }
+
+.admin-order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 220px;
+}
+
+.admin-order-items-count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.admin-order-item {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+}
+
+.admin-order-item-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.admin-order-item-meta {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
 /* admin screen */
 .admin-layout {
   display: grid;
