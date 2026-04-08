@@ -104,17 +104,17 @@ http://localhost:8080
 
 ### Frontend
 
-Use any static server. Example:
+A Node.js static server is included:
 
 ```bash
 cd frontend
-python -m http.server 5500
+node server.js
 ```
 
 Frontend runs at:
 
 ```text
-http://localhost:5500
+http://localhost:3000
 ```
 
 ## API Summary
@@ -173,8 +173,19 @@ Example add-to-cart request:
 - If game images do not show in orders, restart the backend after DTO or service changes.
 - If you reset the schema with `ddl-auto=create`, you may need to add sample games again through the admin API or admin page.
 
+## AI Assistance
+
+Amazon Q Developer (AI assistant) was used during development for:
+
+- Security fixes — identifying and resolving vulnerabilities such as hardcoded credentials, XSS risks, and path traversal issues in the frontend
+- Frontend bug fixes — fixing broken HTML structure, duplicate event listeners, and inconsistent API calls across pages
+- Code cleanup — removing auto-generated comments and reformatting JS/HTML files to match a consistent human-readable style
+- README — writing and formatting the project documentation 
+
 ## Known Current Behavior
 
 - Prices are displayed in rupees in the UI.
 - Orders return game image URLs for rendering on the orders page.
 - Admin game creation and update expect the backend field name `image`.
+
+srftwsrtstxfgdst5yfyuy rtyur5yeytt5twrw
