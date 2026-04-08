@@ -47,8 +47,6 @@ mvnw.cmd
 .env.local
 .env.*.local
 
-backend/src/main/resources/application.properties
-
 # OS
 Thumbs.db
 .DS_Store
