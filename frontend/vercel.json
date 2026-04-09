@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://gamevault-djgd.onrender.com/api/$1"
+    }
+  ]
+}

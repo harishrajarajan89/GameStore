@@ -1,4 +1,8 @@
-const BASE_URL = 'http://localhost:8080/api';
+const API_ORIGIN = window.location.hostname === 'localhost'
+  ? 'http://localhost:8080'
+  : '';
+
+const BASE_URL = `${API_ORIGIN}/api`;
 
 const Auth = {
   getUser() {
@@ -45,8 +49,7 @@ async function apiFetch(path, options = {}) {
 
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
-    headers,
-    credentials: 'include'
+    headers
   });
 
   if (res.status === 204) return null;
