@@ -1,191 +1,174 @@
 # GameVault
 
-Full-stack game store built with Spring Boot, PostgreSQL, and a vanilla HTML/CSS/JavaScript frontend.
+This is a full-stack game store project built using Spring Boot for the backend and a simple HTML/CSS/JavaScript frontend.
 
 ## Overview
 
-- Backend: Spring Boot 3.2, Spring Security, Spring Data JPA
-- Database: PostgreSQL
-- Frontend: static HTML, CSS, and JavaScript
-- Images: Cloudinary upload support for admin game management
-- Auth: HTTP Basic Authentication
-- Currency in UI: rupees (`Rs`)
+This project is a basic e-commerce style application where users can browse games, add them to cart, and place orders. It also has an admin side to manage games.
+
+### Tech Stack
+
+* Backend: Spring Boot (Java)
+* Database: PostgreSQL (Neon DB)
+* Frontend: HTML, CSS, JavaScript (no framework)
+* Image Storage: Cloudinary
+* Authentication: Basic Auth (Spring Security)
+
+------------
+Admin: admin / admin123
+User: testuser / password123
+----------------
+
+## DEMO Link
+https://drive.google.com/file/d/1KdFoXBHuX0-2JFpf5owHmU-kh7NmWqwm/view?usp=sharing
+
+## Status
+
+* Backend: Live on Render - https://gamevault-djgd.onrender.com/ 
+* Frontend: Live on Vercel - https://game-store-n7qhtvvna-harishrajarajan89s-projects.vercel.app/
+(Backend takes time to respond on first request due to free hosting)
+* Database: Connected (Neon DB) 
+Project is fully working end-to-end.
 
 ## Project Structure
 
-```text
+```
 game-store/
-|-- backend/
-|   |-- pom.xml
-|   `-- src/main/
-|       |-- java/com/gamestore/
-|       |   |-- config/
-|       |   |-- controller/
-|       |   |-- dto/
-|       |   |-- exception/
-|       |   |-- model/
-|       |   |-- repository/
-|       |   `-- service/
-|       `-- resources/
-|           `-- application.properties
-|-- frontend/
-|   |-- index.html
-|   |-- css/
-|   |-- js/
-|   `-- pages/
-`-- README.md
+│-- backend/
+│   │-- pom.xml
+│   └── src/main/
+│       ├── java/com/gamestore/
+│       └── resources/
+│
+│-- frontend/
+│   │-- index.html
+│   │-- css/
+│   │-- js/
+│   └── pages/
+│
+└── README.md
 ```
 
-## Backend Notes
 
-- Main class: `backend/src/main/java/com/gamestore/GameStoreApplication.java`
-- Security config: `backend/src/main/java/com/gamestore/config/SecurityConfigration.java`
-- Global API error handling: `backend/src/main/java/com/gamestore/exception/GlobalExceptionHandler.java`
-- Default seeded users are created by `DataInitializer`
+## Features
 
-Default users:
+* View all available games
+* Add to cart and update quantity
+* Place orders
+* Admin can add/update/delete games
+* Image upload using Cloudinary
+* Basic login system
 
-- Admin: `admin` / `admin123`
-- User: `testuser` / `password123`
 
-## Frontend Notes
+## Backend Info
 
-- Main storefront: `frontend/index.html`
-- Shared API client: `frontend/js/api.js`
-- Shared UI helpers: `frontend/js/ui.js`
-- Admin page: `frontend/pages/admin.html`
+* Main class: `GameStoreApplication.java`
+* Uses Spring Data JPA for database operations
+* Security handled using Spring Security
+* Some default users are created when app starts:
+
+
+## Frontend Info
+
+* Main page: `index.html`
+* API calls handled in: `js/api.js`
+* Admin panel: `pages/admin.html`
+
+
+## Deployment
+
+* Backend deployed on Render
+* Frontend deployed on Vercel
+
+Note: Since Render free tier is used, the backend may take around 30–40 seconds to respond if it was inactive.
 
 ## Configuration
 
-Edit `backend/src/main/resources/application.properties` and set your own values:
+Update `application.properties` with your own values:
 
-```properties
-server.port=8080
-
-spring.datasource.url=jdbc:postgresql://YOUR_HOST/YOUR_DB?sslmode=require
+-----------
+spring.datasource.url=YOUR_DB_URL
 spring.datasource.username=YOUR_USERNAME
 spring.datasource.password=YOUR_PASSWORD
-spring.datasource.driver-class-name=org.postgresql.Driver
 
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
+cloudinary.cloud-name=YOUR_NAME
+cloudinary.api-key=YOUR_KEY
+cloudinary.api-secret=YOUR_SECRET
+------------
 
-cloudinary.cloud-name=YOUR_CLOUD_NAME
-cloudinary.api-key=YOUR_API_KEY
-cloudinary.api-secret=YOUR_API_SECRET
-```
-
-Important:
-
-- Do not commit real database or Cloudinary secrets.
-- If you want to rebuild the schema during local testing, temporarily use:
-
-```properties
-spring.jpa.hibernate.ddl-auto=create
-```
-
-Then switch it back to `update` after the schema is recreated.
 
 ## Run Locally
 
 ### Backend
 
-```bash
 cd backend
 mvn spring-boot:run
-```
 
-Backend runs at:
+Runs on:
 
-```text
 http://localhost:8080
-```
 
 ### Frontend
 
-A Node.js static server is included:
-
-```bash
 cd frontend
 node server.js
-```
 
-Frontend runs at:
+Runs on:
 
-```text
 http://localhost:3000
-```
 
-## API Summary
 
-### Auth
+## Challenges Faced
 
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `POST /api/auth/logout`
-- `GET /api/auth/me`
+During this project, I faced several issues, especially while deployment:
 
-### Games
+* **Render build errors**
 
-- `GET /api/games`
-- `GET /api/games/{id}`
-- `POST /api/games`
-- `PUT /api/games/{id}`
-- `DELETE /api/games/{id}`
+  * Initially selected Node environment instead of Java/Docker
+  * Faced `mvn: command not found` error
 
-### Images
+* **Docker issues**
 
-- `POST /api/images/upload`
+  * Dockerfile name was incorrect (`DockerFile` instead of `Dockerfile`)
+  * Wrong Dockerfile path caused build failures
 
-### Cart
+* **Path confusion**
 
-- `GET /api/cart`
-- `POST /api/cart/items`
-- `PUT /api/cart/items/{id}?quantity=2`
-- `DELETE /api/cart/items/{id}`
-- `DELETE /api/cart`
+  * Root directory and build context were misconfigured
+  * Took time to understand how Render handles paths
 
-Example add-to-cart request:
+* **Frontend deployment issues**
 
-```json
-{
-  "gameId": 1,
-  "quantity": 1
-}
-```
+  * Vercel was deploying from wrong branch (`main` vs `master`)
+  * Initially selected wrong root directory (not `frontend`)
 
-### Orders
+* **CORS issues**
 
-- `POST /api/orders/checkout`
-- `GET /api/orders`
-- `GET /api/orders/{id}`
+  * Frontend couldn't call backend until CORS config was fixed
 
-### Admin
+* **Cold start delay**
 
-- `GET /api/admin/orders`
-- `PUT /api/admin/orders/{id}/status?status=SHIPPED`
+  * Backend takes time to respond on first request due to free hosting
 
-## Development Tips
+These issues helped me understand real-world deployment problems better.
 
-- If port `8080` is already in use, stop the existing Java process or run on another port.
-- If the frontend still shows old JS or CSS after a change, do a hard refresh.
-- If game images do not show in orders, restart the backend after DTO or service changes.
-- If you reset the schema with `ddl-auto=create`, you may need to add sample games again through the admin API or admin page.
+---
 
-## AI Assistance
+## Notes
 
-Amazon Q Developer (AI assistant) was used during development for:
+* Backend returns image URLs for frontend display
+* Admin APIs expect `image` field while creating/updating games
 
-- Security fixes — identifying and resolving vulnerabilities such as hardcoded credentials, XSS risks, and path traversal issues in the frontend
-- Frontend bug fixes — fixing broken HTML structure, duplicate event listeners, and inconsistent API calls across pages
-- Code cleanup — removing auto-generated comments and reformatting JS/HTML files to match a consistent human-readable style
-- README — writing and formatting the project documentation 
+---
 
-## Known Current Behavior
+## AI Usage
 
-- Prices are displayed in rupees in the UI.
-- Orders return game image URLs for rendering on the orders page.
-- Admin game creation and update expect the backend field name `image`.
+Some AI tools were used during development mainly for:
 
-srftwsrtstxfgdst5yfyuy rtyur5yeytt5twrw
+* Debugging errors
+* Fixing frontend issues
+* Understanding deployment problems
+
+But most of the integration and debugging was done manually.
+
+---
