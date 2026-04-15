@@ -15,7 +15,7 @@ This project is a basic e-commerce style application where users can browse game
 * Authentication: Basic Auth (Spring Security)
 
 ------------
-## Credentials
+## Test Credentials or you can register and use the same
 Admin: admin / admin123
 User: testuser / password123
 ----------------
