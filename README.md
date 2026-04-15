@@ -15,6 +15,7 @@ This project is a basic e-commerce style application where users can browse game
 * Authentication: Basic Auth (Spring Security)
 
 ------------
+## Credentials
 Admin: admin / admin123
 User: testuser / password123
 ----------------
@@ -80,7 +81,16 @@ game-store/
 * Backend deployed on Render
 * Frontend deployed on Vercel
 
-Note: Since Render free tier is used, the backend may take around 30–40 seconds to respond if it was inactive.
+Note: Since Render free tier is used, the backend may take around 30–60 seconds to respond if it was inactive.
+
+To fix this, I used cron-job.org to keep the backend alive.
+
+Created a cron job that hits the backend API every 5 minutes. This prevents the server from going idle 
+Result
+      -Backend stays active
+      -No delay on first request
+      -App feels much faster
+      -Related server error resolved
 
 ## Configuration
 
@@ -150,7 +160,6 @@ During this project, I faced several issues, especially while deployment:
 
   * Backend takes time to respond on first request due to free hosting
 
-These issues helped me understand real-world deployment problems better.
 
 ---
 
@@ -171,4 +180,3 @@ Some AI tools were used during development mainly for:
 
 But most of the integration and debugging was done manually.
 
----
