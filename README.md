@@ -1,182 +1,104 @@
 # GameVault
 
-This is a full-stack game store project built using Spring Boot for the backend and a simple HTML/CSS/JavaScript frontend.
+GameVault is a full-stack game store built with Spring Boot, PostgreSQL, and a vanilla HTML/CSS/JavaScript frontend. Users can create their own accounts, browse the catalog, manage a cart, and place orders. An optional admin account can be seeded for catalog and order management.
 
-## Overview
+## Demo
 
-This project is a basic e-commerce style application where users can browse games, add them to cart, and place orders. It also has an admin side to manage games.
-
-### Tech Stack
-
-* Backend: Spring Boot (Java)
-* Database: PostgreSQL (Neon DB)
-* Frontend: HTML, CSS, JavaScript (no framework)
-* Image Storage: Cloudinary
-* Authentication: Basic Auth (Spring Security)
-
-------------
-## Test Credentials or you can register and use the same
-Admin: admin / admin123
-User: testuser / password123
-----------------
-
-## DEMO Link
-https://drive.google.com/file/d/1KdFoXBHuX0-2JFpf5owHmU-kh7NmWqwm/view?usp=sharing
-
-## Status
-
-* Backend: Live on Render - https://gamevault-djgd.onrender.com/ 
-* Frontend: Live on Vercel - https://game-store-n7qhtvvna-harishrajarajan89s-projects.vercel.app/
-(Backend takes time to respond on first request due to free hosting)
-* Database: Connected (Neon DB) 
-Project is fully working end-to-end.
-
-## Project Structure
-
-```
-game-store/
-│-- backend/
-│   │-- pom.xml
-│   └── src/main/
-│       ├── java/com/gamestore/
-│       └── resources/
-│
-│-- frontend/
-│   │-- index.html
-│   │-- css/
-│   │-- js/
-│   └── pages/
-│
-└── README.md
-```
-
+Video walkthrough: [GameVault demo](https://drive.google.com/file/d/1KdFoXBHuX0-2JFpf5owHmU-kh7NmWqwm/view?usp=sharing)
 
 ## Features
 
-* View all available games
-* Add to cart and update quantity
-* Place orders
-* Admin can add/update/delete games
-* Image upload using Cloudinary
-* Basic login system
+* Browse the game catalog with images, pricing, genre, and platform details
+* Register a new user account and log in with Spring Security Basic Auth
+* Add games to cart, update quantities, and clear the cart
+* Place orders and review previous orders
+* Manage games and order statuses from the admin dashboard
+* Upload and store cover images with Cloudinary
 
+## Tech Stack
 
-## Backend Info
+* Backend: Spring Boot 3, Spring Security, Spring Data JPA, Maven, Java 21
+* Frontend: HTML, CSS, JavaScript
+* Database: PostgreSQL
+* Media storage: Cloudinary
+* Hosting target: Docker-friendly backend deployable to Fly.io, Railway, or a VPS
 
-* Main class: `GameStoreApplication.java`
-* Uses Spring Data JPA for database operations
-* Security handled using Spring Security
-* Some default users are created when app starts:
+## Account Access
 
+Regular users do not need shared demo credentials. Open the register page and create a fresh account to explore the shopper flow.
 
-## Frontend Info
+Admin access is optional. If you want admin features in a local or hosted deployment, provide these environment variables for the backend before startup:
 
-* Main page: `index.html`
-* API calls handled in: `js/api.js`
-* Admin panel: `pages/admin.html`
+* `APP_SEED_ADMIN_USERNAME`
+* `APP_SEED_ADMIN_EMAIL`
+* `APP_SEED_ADMIN_PASSWORD`
 
+If those values are not set, the application starts normally without creating a default admin user.
 
-## Deployment
+## Project Structure
 
-* Backend deployed on Render
-* Frontend deployed on Vercel
-
-Note: Since Render free tier is used, the backend may take around 30–60 seconds to respond if it was inactive.
-
-To fix this, I used cron-job.org to keep the backend alive.
-
-Created a cron job that hits the backend API every 5 minutes. This prevents the server from going idle 
-Result
-      -Backend stays active
-      -No delay on first request
-      -App feels much faster
-      -Related server error resolved
+```text
+game-store/
+|-- backend/
+|   |-- pom.xml
+|   |-- Dockerfile
+|   `-- src/main/
+|-- frontend/
+|   |-- index.html
+|   |-- css/
+|   |-- js/
+|   `-- pages/
+`-- README.md
+```
 
 ## Configuration
 
-Update `application.properties` with your own values:
+The backend reads its runtime configuration from environment variables. The required variables are:
 
------------
-spring.datasource.url=YOUR_DB_URL
-spring.datasource.username=YOUR_USERNAME
-spring.datasource.password=YOUR_PASSWORD
+* `DB_URL`
+* `DB_USER`
+* `DB_PASS`
+* `CLOUDINARY_CLOUD_NAME`
+* `CLOUDINARY_API_KEY`
+* `CLOUDINARY_API_SECRET`
 
-cloudinary.cloud-name=YOUR_NAME
-cloudinary.api-key=YOUR_KEY
-cloudinary.api-secret=YOUR_SECRET
-------------
-
+These are mapped in [application.properties](/E:/projects/game-store/backend/src/main/resources/application.properties:1).
 
 ## Run Locally
 
 ### Backend
 
+```bash
 cd backend
 mvn spring-boot:run
+```
 
-Runs on:
-
-http://localhost:8080
+The API runs at `http://localhost:8080`.
 
 ### Frontend
 
+```bash
 cd frontend
 node server.js
+```
 
-Runs on:
+The frontend runs at `http://localhost:3000`.
 
-http://localhost:3000
+## Deployment Notes
 
+The backend should be deployed to a supported always-on provider such as Fly.io, Railway paid tier, or a VPS before submission. The repository already includes a Dockerfile for container deployment.
 
-## Challenges Faced
+If you deploy the frontend separately, update [frontend/vercel.json](/E:/projects/game-store/frontend/vercel.json:1) so `/api/*` rewrites point to your deployed backend domain.
 
-During this project, I faced several issues, especially while deployment:
+## Implementation Notes
 
-* **Render build errors**
-
-  * Initially selected Node environment instead of Java/Docker
-  * Faced `mvn: command not found` error
-
-* **Docker issues**
-
-  * Dockerfile name was incorrect (`DockerFile` instead of `Dockerfile`)
-  * Wrong Dockerfile path caused build failures
-
-* **Path confusion**
-
-  * Root directory and build context were misconfigured
-  * Took time to understand how Render handles paths
-
-* **Frontend deployment issues**
-
-  * Vercel was deploying from wrong branch (`main` vs `master`)
-  * Initially selected wrong root directory (not `frontend`)
-
-* **CORS issues**
-
-  * Frontend couldn't call backend until CORS config was fixed
-
-* **Cold start delay**
-
-  * Backend takes time to respond on first request due to free hosting
-
-
----
-
-## Notes
-
-* Backend returns image URLs for frontend display
-* Admin APIs expect `image` field while creating/updating games
-
----
+* Public catalog endpoints are open, while cart, order, and admin endpoints require authentication.
+* A cart is created automatically when a new user registers.
+* Image URLs are stored and returned by the backend for frontend rendering.
 
 ## AI Usage
 
-Some AI tools were used during development mainly for:
+AI assistance was used in a limited, supervised way during development for:
 
-* Debugging errors
-* Fixing frontend issues
-* Understanding deployment problems
-
-But most of the integration and debugging was done manually.
-
+* debugging Spring Boot and deployment issues
+* refining frontend interactions and validation

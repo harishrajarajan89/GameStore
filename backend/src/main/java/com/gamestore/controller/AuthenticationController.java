@@ -1,6 +1,5 @@
 package com.gamestore.controller;
 
-import org.apache.http.auth.AuthSchemeRegistry;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;

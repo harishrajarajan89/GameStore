@@ -1,5 +1,8 @@
 package com.gamestore.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -11,9 +14,20 @@ import com.gamestore.repository.UserRepository;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
+    private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);
+
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${app.seed.admin.username:}")
+    private String adminUsername;
+
+    @Value("${app.seed.admin.email:}")
+    private String adminEmail;
+
+    @Value("${app.seed.admin.password:}")
+    private String adminPassword;
 
     public DataInitializer(
         UserRepository userRepository,
@@ -26,31 +40,24 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
-        //  default test user 
-        if (userRepository.findByUsername("testuser").isEmpty()) {
-            User testUser = User.builder()
-                .username("testuser")
-                .email("test@example.com")
-                .password(passwordEncoder.encode("password123"))
-                .role(User.Role.USER)
-                .build();
-            testUser = userRepository.save(testUser);
-            cartRepository.save(Cart.builder().user(testUser).build());
-            System.out.println("✓ Default test user created: username=testuser, password=password123");
+    public void run(String... args) {
+        if (adminUsername.isBlank() || adminEmail.isBlank() || adminPassword.isBlank()) {
+            logger.info("Admin seed skipped because app.seed.admin.* values were not fully provided.");
+            return;
         }
 
-        // admin user
-        if (userRepository.findByUsername("admin").isEmpty()) {
-            User adminUser = User.builder()
-                .username("admin")
-                .email("admin@example.com")
-                .password(passwordEncoder.encode("admin123"))
-                .role(User.Role.ADMIN)
-                .build();
-            adminUser = userRepository.save(adminUser);
-            cartRepository.save(Cart.builder().user(adminUser).build());
-            System.out.println("✓ Default admin user created: username=admin, password=admin123");
+        if (userRepository.findByUsername(adminUsername).isPresent()) {
+            return;
         }
+
+        User adminUser = User.builder()
+            .username(adminUsername)
+            .email(adminEmail)
+            .password(passwordEncoder.encode(adminPassword))
+            .role(User.Role.ADMIN)
+            .build();
+        adminUser = userRepository.save(adminUser);
+        cartRepository.save(Cart.builder().user(adminUser).build());
+        logger.info("Default admin user created for {}", adminUsername);
     }
 }

@@ -33,8 +33,11 @@ public class AuthenticationService {
     }
     @Transactional
     public AuthenticationResponse register(RegisterRequest request){
+        if(userRepository.existsByUsername(request.getUsername())){
+            throw new BadRequestException("Username already exists");
+        }
         if(userRepository.existsByEmail(request.getEmail())){
-            throw new BadRequestException("Email aleady exists");
+            throw new BadRequestException("Email already exists");
         }
         User user = User.builder().username(request.getUsername()).email(request.getEmail()).password(passwordEncoder.encode((request.getPassword()))).role(User.Role.USER).build();
         user = userRepository.save(user);

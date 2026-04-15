@@ -12,7 +12,7 @@
   <div class="auth-page">
     <div class="auth-box">
       <h1>Create Account</h1>
-      <p>Join GameVault and start building your collection</p>
+      <p>Create your own account to browse, add games to cart, and place orders.</p>
 
       <div id="alert-box"></div>
 
@@ -28,7 +28,7 @@
         <div class="form-group">
           <label for="password">Password</label>
           <div class="password-group">
-            <input type="password" id="password" placeholder="Min 6 characters" required minlength="6" oninput="updatePasswordIcon('password')"/>
+            <input type="password" id="password" placeholder="Min 8 characters" required minlength="8" oninput="updatePasswordIcon('password')"/>
             <button type="button" class="password-toggle" onclick="togglePassword('password')">
               <svg class="eye-icon" id="password-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -102,8 +102,8 @@
         if (password !== confirm) {
           showAlert('alert-box', 'Passwords do not match.', 'error'); return;
         }
-        if (password.length < 6) {
-          showAlert('alert-box', 'Password must be at least 6 characters.', 'error'); return;
+        if (password.length < 8) {
+          showAlert('alert-box', 'Password must be at least 8 characters.', 'error'); return;
         }
 
         setLoading(btn, true, 'Creating account...');
